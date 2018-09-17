@@ -1,0 +1,20 @@
+\documentclass{article}
+\usepackage{multirow}
+\begin{document}
+\begin{table}[!hbp]
+\begin{tabular}{*{7}{|c}|}
+\hline $\mathit{f}$&$\mathit{g}$&$\mathit{O}$&$\mathit{o}$&$\Omega$&$\omega$&$\Theta$\\
+\hline $\log^2n$&$6\log n$&No&No&Yes&Yes&No\\
+\hline $\sqrt{\log n}$&$(\log \log n )^3$&No&No&Yes&Yes&No\\
+\hline $4n\log n$&$n\log 4n$&No&No&Yes&Yes&No\\
+\hline $n^{3/5}$&$\sqrt{n}\log n$&No&No&Yes&Yes&No\\
+\hline $5\sqrt{n}+\log n$&$2\sqrt{n}$&Yes&No&Yes&No&Yes \\
+\hline $n^54^n$&$5^n$&Yes&Yes&No&No&No\\
+\hline $\sqrt{n}2^n$&$2^{n/2+\log n}$&No&No&Yes&Yes&No\\
+\hline $n\log 2n$&$\frac{n^2}{\log n}$&Yes&Yes&No&No&No\\
+\hline $n!$&$2^n$&No&No&Yes&Yes&No\\
+\hline $\log n!$&$\log n^n$&Yes&Yes&No&No&No\\
+\hline
+\end{tabular}
+\end{table}
+\end{document}

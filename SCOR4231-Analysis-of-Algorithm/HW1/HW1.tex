@@ -1,0 +1,590 @@
+\documentclass{article} 
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\lstset{ %
+    language=Python,                % the language of the code
+    basicstyle=\footnotesize,           % the size of the fonts that are used for the code
+    numbers=left,                   % where to put the line-numbers
+    numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
+    stepnumber=2,                   % the step between two line-numbers. If it's 1, each line 
+                                    % will be numbered
+    numbersep=5pt,                  % how far the line-numbers are from the code
+    backgroundcolor=\color{white},      % choose the background color. You must add \usepackage{color}
+    showspaces=false,               % show spaces adding particular underscores
+    showstringspaces=false,         % underline spaces within strings
+    showtabs=false,                 % show tabs within strings adding particular underscores
+    frame=single,                   % adds a frame around the code
+    rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+    tabsize=2,                      % sets default tabsize to 2 spaces
+    captionpos=b,                   % sets the caption-position to bottom
+    breaklines=true,                % sets automatic line breaking
+    breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+    title=\lstname,                 % show the filename of files included with \lstinputlisting;
+                                    % also try caption instead of title
+    keywordstyle=\color{blue},          % keyword style
+    commentstyle=\color{dkgreen},       % comment style
+    stringstyle=\color{mauve},         % string literal style
+    escapeinside={\%*}{*)},            % if you want to add LaTeX within your code
+    morekeywords={*,...}               % if you want to add more keywords to the set                                   
+}
+
+\Large
+\title{CSOR W4231 Analysis of Algorithm} 
+\author{Jialin Zhao} 
+\date{\today}
+\begin{document} 
+\maketitle{} 
+\section{Problem \uppercase\expandafter{\romannumeral1}} 
+\begin{table}[!hbp]
+\LARGE
+\begin{center}
+\begin{tabular}{*{7}{|c}|}
+
+\hline $\mathit{f}$&$\mathit{g}$&$\mathit{O}$&$\mathit{o}$&$\Omega$&$\omega$&$\Theta$\\
+\hline $\log^2n$&$6\log n$&No&No&Yes&Yes&No\\
+\hline $\sqrt{\log n}$&$(\log \log n )^3$&No&No&Yes&Yes&No\\
+\hline $4n\log n$&$n\log 4n$&Yes&No&Yes&No&Yes\\
+\hline $n^{3/5}$&$\sqrt{n}\log n$&No&No&Yes&Yes&No\\
+\hline $5\sqrt{n}+\log n$&$2\sqrt{n}$&Yes&No&Yes&No&Yes \\
+\hline $n^54^n$&$5^n$&Yes&Yes&No&No&No\\
+\hline $\sqrt{n}2^n$&$2^{n/2+\log n}$&No&No&Yes&Yes&No\\
+\hline $n\log 2n$&$\frac{n^2}{\log n}$&Yes&Yes&No&No&No\\
+\hline $n!$&$2^n$&No&No&Yes&Yes&No\\
+\hline $\log n!$&$\log n^n$&Yes&No&Yes&No&Yes\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\section{Problem \uppercase\expandafter{\romannumeral2}}
+\subsection{(a)}
+\textbf{\large Correctness:}\\\\
+\textbf{Base case:} i = 0\\
+After the loop, $z_0=a_0$\\
+The solution of the polynomial is true.\\
+\textbf{Induction hypothesis:} Assume that the statement is true for case $i\geq 0$.\\
+\textbf{Inductive step:} Show it true for case i+1\\
+This case equals to case i, when we set the initial $z = a_{i+1}x+a_{i}$ instead of $z = a_{i}$\\
+By the induction hypothesis, case i is correct which means $z = a_0 + a_1x + ... + a_ix^i$\\
+Then in the case i+1, $z = a_0 + a_1x + ... + (a_{i+1}x+a_i)x^i = a_0 + a_1 + ... + a_ix^i + a_{i+1}x^{i+1}$\\
+Which means the solution of the polynomial is also true in case i+1.\\
+\textbf{Conclusion:}\\
+It follows that the statement is true for all n since we can apply the inductive step for n = 2; 3; : : :
+\subsection{(b)}
+This function uses n multiplications and n additions, where n equals the number of iterations of the for loop.\\
+\textbf{A special polynomial:}\\
+A single non-zero coefficient $a_ix^i$\\
+\textbf{Better alternative method:}\\
+Using the repeated squaring method of evaluating $x^i$:\\
+Repeated squaring method:\\\\
+\textbf{\large Pseudocode:}
+\begin{algorithm}
+  \caption{Function exp-by-squaring$(x,i)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \IF{$i < 0$}
+  \RETURN exp-by-squaring(1/x, -i)
+  \ELSIF{i = 0}
+  \RETURN 1
+  \ELSIF{i = 1}
+  \RETURN x
+  \ELSIF{i is even}
+  \RETURN exp-by-squaring(x * x,  i / 2)
+  \ELSIF{i is odd}
+  \RETURN x * exp-by-squaring(x * x, (i - 1) / 2)
+  \ENDIF
+  \end{algorithmic}
+\end{algorithm}
+\begin{algorithm}
+  \caption{Function A-exp-by-squaring$(a,x,i)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \RETURN  a * exp-by-squaring(x,i)
+  \end{algorithmic}
+\end{algorithm}\\
+\textbf{\large Time Complexity:}\\\\
+The problem is converted into a half-scale subproblem and using 1 or 2 multiplation in O(1) time:\\
+$$T(n)=T(n/2) + O(1)$$
+According to master thereom, the method Will use O($\log i$) multiplications.\\\\
+\textbf{\large Space Complexity:}\\\\
+The depth of recursion tree is $\log n$, the space used by each recuirsion step is $O(1)$.\\
+So, the space complexity is $O(\log n)$\\\\
+\textbf{\large Correctness:}\\\\
+\textbf{Base case:} n = 0,1\\
+$$x_0=1,x_1=x$$
+The statement is true.\\
+\textbf{Induction hypothesis:} Assume that the statement is true for every case n from 0 to i,$i \ge 1$.\\
+\textbf{Inductive step:} Show it true for case i+1\\
+Since we can find a case i/2 or (i+1)/2 in which the statement is true as a base case.\\
+If i+1 is an odd number, $x^{i+1}=x*{(x^2)}^{(i)/2}=x^{i+1}$\\
+If i+1 is an even number, $x^{i+1}={(x^2)}^{(i+1)/2}=x^{i+1}$\\
+Which means the statement is also true in case i+1.\\
+\textbf{Conclusion:}\\
+It follows that the statement is true for all n since we can apply the inductive step for every odd or even number n = 2; 3; : : :
+
+
+
+\section{Problem \uppercase\expandafter{\romannumeral3}}
+Let $v$ also be represented by two halfs:\\
+$$
+v =
+\begin{bmatrix}
+    v_{h}\\
+    v_{l}
+\end{bmatrix}\\
+$$
+Where $v_h$ and $v_l$ are of n/2 scale.\\
+Then:\\
+$$
+H_kv = 
+\begin{bmatrix}
+    H_{k-1} & H_{k-1}\\
+    H_{k-1} & -H_{k-1} 
+\end{bmatrix}\\
+*
+\begin{bmatrix}
+    v_{h}\\
+    v_{l}
+\end{bmatrix}\\
+=
+\begin{bmatrix}
+    H_{k-1}v_{h}+H_{k-1}v_{l}\\
+    H_{k-1}v_{h}-H_{k-1}v_{l}
+\end{bmatrix}\\
+$$
+\textbf{\large Correctness:}\\\\
+\textbf{Base case:} n = $2^k$, k = 0\\
+Then $H_0 v = v$\\
+The statement is true.\\
+\textbf{Induction hypothesis:} Assume that the statement is true for case $k\ge 0$.\\
+\textbf{Inductive step:} Show it true for case k+1\\
+Since the $H_k v$ is correct,\\
+Then $H_{k+1} v = \begin{bmatrix}
+    H_{k} & H_{k}\\
+    H_{k} & -H_{k} 
+\end{bmatrix}
+*
+\begin{bmatrix}
+    v_{h}\\
+    v_{l}
+\end{bmatrix}
+=
+\begin{bmatrix}
+    H_{k}v_{h}+H_{k}v_{l}\\
+    H_{k}v_{h}-H_{k}v_{l}
+\end{bmatrix}$
+is also correct.\\
+Which means the statement is also true in case k+1.\\
+\textbf{Conclusion:}\\
+It follows that the statement is true for all n since we can apply the inductive step for every odd or even number k = 1; 2; 3; : : :\\\\
+\textbf{\large Time Complexity:}\\\\
+So each step we convert the problem of $H_{k}v$$(T(n)$ time) into $H_{k-1}v_{h}$($T(n/2)$ time) and $H_{k-1}v_{l}$($T(n/2)$ time) and some addition or substraction($O(n)$ time), since elementwise operations take $O(1)$ time.\\
+Therefore:
+$$
+T(n)=2T(n/2)+O(n)\\
+$$
+According to Master Teorem:
+$$
+T(n)=\Theta (n\log n)<\Theta (n^2)
+$$
+where $n=2^k$.\\
+Faster than the straight forward algorithm.\\\\
+\textbf{\large Space Complexity:}\\\\
+The depth of the recursion tree is $k=(\log_2{n})$, each recursion uses $O(n)$ space, so the space complexity should be computed by adding the space used in the deepest recursion branch: $\sum_{1}^{\log_2 n} O(n/{2^i})=O(n)$\\\\
+\textbf{\large Pseudocode:}
+\begin{algorithm}
+  \caption{Function Hadamard$(k,v)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \IF{k = 0}
+  \RETURN v
+  \ENDIF
+  \STATE $v_h$ $\Longleftarrow$ Higher Half Part of v
+  \STATE $v_l$ $\Longleftarrow$ Lower Half Part of v
+  \STATE A $\Longleftarrow$ Hadamard$(k-1,v_h)$
+  \STATE B $\Longleftarrow$ Hadamard$(k-1,v_l)$
+  \STATE Result $\Longleftarrow$ $\begin{bmatrix}
+  A+B\\
+  A-B
+  \end{bmatrix}$
+  \RETURN Result
+  \end{algorithmic}
+\end{algorithm}
+
+
+
+
+\section{Problem \uppercase\expandafter{\romannumeral4}}
+\subsection{(a)}
+If we use divide and conquer method to get a $O(n\log n)$-time solution.\\
+We can divide the problem into two (n/2) scale subproblem and use $O(n)$ time to combine subproblems.\\
+Here is my sample solution:\\\\
+\textbf{\large Pseudocode:}
+\begin{algorithm}
+  \caption{Function Majority(array $A$)}
+  \label{alg1}
+  \begin{algorithmic}
+  \IF{$Length(A)=0$}
+  \RETURN None
+  \ENDIF
+  \IF{$Length(A)=1$}
+  \RETURN the only element in A
+  \ENDIF
+  \STATE $A1$ $\Longleftarrow$ Array of first n/2 elements of $A$
+  \STATE $A2$ $\Longleftarrow$ Array of the left elements of $A$
+  \STATE $a1$ $\Longleftarrow$ Majority($A1$)
+  \STATE $a2$ $\Longleftarrow$ Majority($A2$)
+  \IF{($a1$ is None) and ($a2$  is None)}
+  \RETURN None
+  \ELSIF{($a1$ is not None) and ($a2$ is not None) and ($a1$ = $a2$)}
+  \RETURN a1
+  \ELSIF{$a1$ is not None}
+  \STATE num $\Longleftarrow$ the amount of $a1$ in A
+  \IF{num$>\lfloor 1/2Length(A)\rfloor$}
+  \STATE return $a1$
+  \ENDIF
+  \ELSIF{$a2$ is not None}
+  \STATE num $\Longleftarrow$ the amount of $a2$ in A
+  \IF{num$>\lfloor 1/2Length(A)\rfloor$}
+  \STATE return $a2$
+  \ENDIF
+  \ELSE\RETURN None
+  \ENDIF
+  \end{algorithmic}
+\end{algorithm}\\
+\textbf{\large Correctness:}\\\\
+As stated, the method is based on divide-conquer principle by induction on the size of the two lists.\\
+If A has a majority element v, v must also be a majority element of A1 or A2 or both.\\
+If both parts have the same majority element, it is automatically the majority element for A.\\ If one or two of the parts has a different majority element, count the number of that element in both parts (in O(n) time) to check if it is a majority element.\\
+If not the cases above, return None.\\
+\textbf{Base case:} subarray of length k = 1\\
+Will return the only element which is definitely the majority.\\
+The statement is true.\\
+\textbf{Induction hypothesis:} Assume that the statement is true for case of length $k\ge length \ge 1$.\\
+\textbf{Inductive step:} Show it true for case of combined array of length k+1\\
+According to the base case, the two subarray of this case is in length (k+1)/2 and will return their majority number correctly.\\
+After choosing and checking the two potential majority numbers, the array in this case can also return its majority number correctly.\\
+\textbf{Conclusion:}\\
+It follows that the statement is true for all array since we can apply the inductive step for any length k = 1; 2; 3; : : :\\\\
+\textbf{\large Time Complexity:}\\\\
+A recurrence relation is T(n) = 2T(n/2) + O(n)\\
+According to Master Teorem:
+$$
+T(n)=O (n\log n)\\
+$$
+\textbf{\large Space Complexity:}\\\\
+The depth of the recursion tree is $\log n$, each recursion step uses $O(n/2^i)$ space.\\
+So the space complexity should be calculated by $\sum_1^{\log n} O(n/{2^i})=O(n)$
+
+
+
+\subsection{(b)}
+If we can use a map storing pairs of (element,count), the problem will be simplified a lot because we can easily look through all elements in the array A, add new element into map and set the count as 0, or we let count+=1. Then just find the only element with a count more than half of the length of A.\\
+However, let's suppose we need to use limited techniques(only array):\\
+My solution is based on an intersting fact of majority number in an array: By discarding two different elements of A, the majority number will not change in the array left.\\
+After discarding all different element pairs the remaining element should be the majority, unless A doesn't have a majority element at all.\\
+So we need to check if the left element is the majority, if yes return it, if no return None.\\\\
+\textbf{\large Correctness:}\\\\
+\textbf{Base case:} Array of length k = 0,1\\
+Will return None or the only element which is definitely the majority.\\
+The result is true.\\
+\textbf{Induction hypothesis:} Assume that the statement is true for case of length $k\ge length \ge 0$.\\
+\textbf{Inductive step:} Show it true for case of array of length = k+2\\
+After discarding two different elements in the array, the majority element number is reduced by 0 or 1 but the total length is reduced by 2, so the majority number will still exceed half number of the arrray.\\
+So this case will return its majority if it has.\\
+The result is true.\\
+\textbf{Conclusion:}\\
+It follows that the statement is true for all array since we can apply the inductive step for any length k = 1; 2; 3; : : :\\
+\textbf{\large Time Complexity:}\\\\
+A recurrence relation is T(n) = T(n-1) + O(1)\\
+Therefore:
+$$
+T(n)=O (n)
+$$
+\textbf{\large Space Complexity:}\\\\
+This is an recurrence method which needs only O(1) extra space.\\\\
+\textbf{\large Pseudocode:}
+\begin{algorithm}
+  \caption{Function Majority(array $A$)}
+  \label{alg1}
+  \begin{algorithmic}
+  \STATE N $\Longleftarrow$ Length of A
+  \IF{N = 0}
+  \RETURN None
+  \ENDIF 
+  \STATE Element $\Longleftarrow$ A[1]
+  \STATE Count $\Longleftarrow$ 1
+  \STATE i $\Longleftarrow$ 2
+  \FOR{$i\le N$}
+  \STATE i = i + 1
+  \IF{Element = A[i]}
+  \STATE Count $\Longleftarrow$ Count + 1
+  \ELSIF{Count $\ge$ 1}
+  \STATE Count $\Longleftarrow$ Count - 1
+  \ELSIF{Count = 0}
+  \STATE Element $\Longleftarrow$ A[i]
+  \STATE Count $\Longleftarrow$ 1
+  \ENDIF
+  \ENDFOR
+  \IF{Look through A and check: Element occurs more than half of the length of A}
+  \RETURN Element
+  \ELSE
+  \RETURN None
+  \ENDIF
+  \end{algorithmic}
+\end{algorithm}\\
+
+
+
+
+
+
+
+\section{Problem \uppercase\expandafter{\romannumeral5}}
+\subsection{(a)}
+\begin{table}[!hbp]
+\LARGE
+\begin{center}
+\begin{tabular}{*{9}{|c}|}
+\hline $n$&$0$&$1$&$2$&$3$&$4$&$5$&$6$&$7$\\
+\hline $F_n$&$0$&$1$&$1$&$2$&$3$&$5$&$8$&$13$\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+\textbf{\large Correctness:}\\\\
+\textbf{Base case:} n = 6,7\\
+$F_6=8 \ge 2_{n/2}=8$\\
+$F_7=13 \ge 2_{n/2}=8\sqrt{2}$\\
+The statement is true.\\
+\textbf{Induction hypothesis:} Assume that the statement is true for case $n\geq 6$ and case $n+1$.\\
+\textbf{Inductive step:} Show it true for case n+2\\
+$F_{n+2}=F_{n+1}+F_{n} \ge 2^{(n+1)/2}+2^{(n)/2}\ge2*2^{(n)/2}=2^{(n+2)/2}$\\
+Which means the statement is also true in case n+2.\\
+\textbf{Conclusion:}\\
+It follows that the statement is true for all $n\ge 6$ since we can apply the inductive step for n = 8; 9; : : :
+
+
+
+
+
+
+
+\subsection{(b)}
+\subsubsection{}
+\textbf{\large Pseudocode:}
+\begin{algorithm}
+  \caption{Function Fibonacci$(n)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \IF{$n\le 1$}
+  \RETURN n
+  \ENDIF
+  \RETURN Fibonacci(n-1)+Fibonacci(n-2)
+  \end{algorithmic}
+\end{algorithm}\\
+\textbf{\large Correctness:}\\\\
+This is the definition, no need to prove it.\\
+Base case: n = 0,1 then $F_0=0,F_1=1$ is true.\\
+Induction step: if case $n \ge 0$ and $n+1$ is true then case n+2 : $F_{n+2}$=$F_{n+1}$+$F_{n}$=true.\\
+So the case n+2 is also true.\\ 
+Conclusion: The Fabonacci number is calculated correctly for every case n =1;2;3:::\\\\
+\textbf{\large Time Complexity:}\\\\
+The problem of computing $F_n$ is converted to computing $F_{n-1}$ and $F_{n-2}$ and a constant-time addition.\\
+Then we have: \\
+$$T(n) = T(n-1)+T(n-2)+O(1)$$
+So in this prograss, we only need to calculate the sum of adding two numbers:\\
+From T(n) to T(n-1): 1 addition;\\
+From T(n-1) to T(n-2): 2 addition;\\
+From T(n-2) to T(n-3): 3 addition;\\
+From T(n-3) to T(n-4): 5 addition;\\
+.....\\
+From T(n-x) to T(n-x-1): $F_{x+2}$ addition;\\
+.....\\
+From T(2) to T(1) and T(0): $F_{n}$ addition;\\
+Then, $T(n)=\Theta (\sum_2^n F_i$)\\
+According to the expression in question(a):
+$$F_i \ge 2^{(n)/2}$$
+Therefore: 
+$$T(n)=\Theta(\sum_2^n F_i)=\Omega(\sum_2^n 2^{(n)/2})=\Omega (2^{(n)/2})$$
+To give a tight bound:\\
+We know from the book that $F_n$ has a closed form expression: $$\frac{\phi^n-\varphi^n}{\sqrt{5}}$$
+where $\phi=\frac{1+\sqrt{5}}{2}$ and $\varphi=\frac{1-\sqrt{5}}{2}$\\
+Therefore:
+$$T(n)=\Theta(\sum_2^n F_i)=\Theta(\sum_2^n \phi^i)=\Theta(\phi^n)$$
+\textbf{\large Space Complexity:}\\\\
+The depth of the recursion tree is n, each recursion step uses $O(1)$ extra space.\\
+The space complexity is $O(n)$.
+
+
+
+
+\subsubsection{}
+\textbf{\large Pseudocode:}
+\begin{algorithm}
+  \caption{Function Fibonacci$(n)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \STATE Memory $\Longleftarrow$ 0
+  \STATE Result $\Longleftarrow$ 1
+  \IF{$n\le 1$}
+  \RETURN n
+  \ENDIF 
+  \FOR{$i = 2$ up to n}
+  \STATE Temp $\Longleftarrow$ Result
+  \STATE Result $\Longleftarrow$ Result + Memory
+  \STATE Memory $\Longleftarrow$ Temp
+  \ENDFOR
+  \RETURN Result
+  \end{algorithmic}
+\end{algorithm}\\
+\textbf{\large Correctness:}\\\\
+This is the definition, no need to prove it.\\
+Base case: n = 0,1 then $F_0=0,F_1=1$ is true.\\
+Induction step: if case $n \ge 0$ and $n+1$ is true then case n+2 : $F_{n+2}$=$F_{n+1}$+$F_{n}$=true.\\
+So the case n+2 is also true.\\ 
+Conclusion: The Fabonacci number is calculated correctly for every case n =1;2;3:::\\\\
+\textbf{\large Time Complexity:}\\
+$$T(n)=T(n-1)+O(1)$$
+To compute $F_n$, the algorithm needs n-1 loops, each loop needs 1 addition in $O(n)$. So we need $n-1*O(1)= O(n)$ time.\\\\
+\textbf{\large Space Complexity:}\\\\
+This is a recurrence method using $O(1)$ extra space.
+\subsubsection{}
+To prove
+$$
+\begin{bmatrix}
+    {0} & {1}\\
+    {1} & {1} 
+\end{bmatrix}^N
+=
+\begin{bmatrix}
+    {F_{N-1}} & {F_N}\\
+    {F_N} & {F_{N+1}} 
+\end{bmatrix}
+$$
+where $N\ge 1$\\
+\textbf{Proof:}\\
+Base case: N = 1\\
+$$
+\begin{bmatrix}
+    {0} & {1}\\
+    {1} & {1} 
+\end{bmatrix}^1
+=
+\begin{bmatrix}
+    {F_{0}} & {F_1}\\
+    {F_1} & {F_{2}} 
+\end{bmatrix}
+$$
+The statement is true in base case.\\
+Induction hypothesis: Assume that the statement is true for case $N \ge 1$.\\
+Inductive step:
+$$
+\begin{bmatrix}
+    {0} & {1}\\
+    {1} & {1} 
+\end{bmatrix}^{N+1}
+=
+\begin{bmatrix}
+    {0} & {1}\\
+    {1} & {1} 
+\end{bmatrix}^{N}
+*
+\begin{bmatrix}
+    {0} & {1}\\
+    {1} & {1} 
+\end{bmatrix}
+=
+\begin{bmatrix}
+    {F_{N-1}} & {F_N}\\
+    {F_N} & {F_{N+1}} 
+\end{bmatrix}
+*
+\begin{bmatrix}
+    {0} & {1}\\
+    {1} & {1} 
+\end{bmatrix}
+=
+\begin{bmatrix}
+    {F_{N}} & {F_{N+1}}\\
+    {F_{N+1}} & {F_{N+2}} 
+\end{bmatrix}
+$$
+The statement is also true in case N+1.
+Conclusion:
+It follows that the statement is true for all n since we can apply the inductive step for n = 2; 3; : : :\\
+-----------------------------\\
+The $O(\log n)$ time method is:	\\\\
+\textbf{\large Pseudocode:}
+\begin{algorithm}
+  \caption{Function FabonacciMatrix$(A,n)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \IF{n = 1}
+  \RETURN A
+  \ELSIF{n = 2}
+  \RETURN A*A
+  \ELSIF{n is even}
+  \RETURN FabonacciMatrix$(A*A,n/2)$
+  \ELSIF{n is odd}
+  \RETURN A*FabonacciMatrix$(A*A,(n-1)/2)$
+  \ENDIF
+  \end{algorithmic}
+\end{algorithm}
+\begin{algorithm}
+  \caption{Function Fabonacci$(n)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \STATE A $\Longleftarrow \begin{bmatrix}
+    {0} & {1}\\
+    {1} & {1} 
+\end{bmatrix}$ 
+  \IF{n $\le$ 1}
+  \RETURN n
+  \ELSE
+  \STATE F $\Longleftarrow$ FabonacciMatrix$(A,n)$
+  \RETURN F[0][1]
+  \ENDIF
+  \end{algorithmic}
+\end{algorithm}\\
+\textbf{\large Time Complexity:}\\\\
+So each step we convert the problem of $A^n$$(T(n)$time) into $A^{n/2}$$(T(n/2)$time) and one or two 2*2 matrix multiplition($O(1)$time)), since elementwise operations take $O(1)$ time.\\
+Therefore:
+$$
+T(n)=2T(n/2)+O(1)\\
+$$
+According to Master Teorem:
+$$
+T(n)=O (\log n)
+$$
+\textbf{\large Space Complexity:}\\\\
+The depth of the recursion tree is $\log n$, each recursion step takes $O(1)$ extra space.\\
+The space complexity is $O(\log n)$
+
+\subsection{(c)}
+Because we are multiplying numbers that have value on the order of $\phi^n$, hence have order n bits.\\
+(b)1.\\Beacause we only use integer addition in this reccursion method, so:
+$$T(n)=T(n-1)+T(n-2)+\Theta(n)$$
+Since we know the number of addition is not changed, therefore:
+$$T(n)=\Theta(n\sum_2^n F_i)=\Theta(n\sum_2^n \phi^i)=\Theta(n\phi^n)=O(2^n)$$
+(b)2.\\Beacause we only use integer addition in this iteration method, so:
+$$T(n)=T(n-1)+\Theta(n)$$
+Therefore, $$T(n)=(n-1)*\Theta(n)=\Theta(n^2)$$
+(b)3.\\We are using only multiplation of time $\Theta(n^2)$ in every loop, so:
+$$T(n)=T(n/2)+\Theta(n^2)$$
+According to master theorem:
+$$T(n)=\Theta(n^2)$$
+
+
+
+
+
+
+\end{document}

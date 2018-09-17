@@ -1,0 +1,174 @@
+\documentclass{article} 
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{float}
+
+\Large
+\title{CSOR4231 Algorithm\\HW4} 
+\author{Jialin Zhao --- jz2862} 
+\date{\today}
+\begin{document} 
+\maketitle{} 
+\section{Problem \uppercase\expandafter{\romannumeral1}} 
+\textbf{(a) Let G = (V, E, w) be a weighted undirected graph. Prove that if all edge weights are distinct, then the minimum spanning tree is unique.\\}
+\textbf{Assumption}:\\
+Assume there are two different MST S and T.\\
+\textbf{Proof by contradiction:}
+
+Assume e is the edge with lowest weight in S while not in T.
+
+If adding e to T, we will have a cycle. If all other edges in T were in S. S would definitely have a cycle which conflicts the fact.So the cycle in T must contain an edge f which is not in S.
+
+By the definition of e and fact that all weights are different. $W(e)<W(f)$. If we replace f by e we get a MST with smaller cost which contradicts with the assumption.
+
+So S and T must be equal. Then the statement that for G the minimum spanning tree is unique got proved.\\
+\textbf{(b) Show how to find the maximum spanning tree of a graph that is, the spanning
+tree of largest total weight.}\\
+\textbf{\large Description:}\\
+Turn the weight of every edges in the graph to its negative value, i.e. multiply every w with -1 then it's turned to -w.\\
+Apply Kruskal’s algorithm to get the minimum spanning tree in this new graph.
+Return the minimum spanning tree as the maximum spanning tree we want in the original graph.\\
+\textbf{\large Pseudocode:}
+\begin{algorithm}[H]
+  \caption{Function MST$(G)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \FOR{every edges $e \in E$}
+  \STATE w(e) = -w(e)
+  \ENDFOR
+  \STATE run Kruskal’s algorithm to get the minimum spanning tree T
+  \RETURN T
+  \end{algorithmic}
+\end{algorithm}
+\noindent\textbf{\large Correctness:\\}
+The minimum spanning tree is exactly the maximum spanning tree after the weights is turned to opposite value because the minimum sum of weights becomes the maximum sum of weights.\\
+As long as the Kruskal’s algorithm returns the correct MST, the whole algorithm is correct.\\
+\textbf{\large Complexity:\\}
+Get the opposite value for weight of every edge takes $O(|E|)$ time.\\
+Run Kruskal’s algorithm takes $O(|E|\log |V|)$ time.\\
+In total, running time is $O(|E|\log |V|)$\\
+
+\clearpage
+\section{Problem \uppercase\expandafter{\romannumeral2}} 
+\textbf{G be a connected graph, and T and T' two different spanning trees of G.
+We say that T and T' are neighbors if T contains exactly one edge that is not in T', and T' contains exactly one edge that is not in T.
+Now build the hypergraph H as follows: the nodes of H are the spanning trees of G, and there is an edge between two nodes of H if the corresponding spanning trees are neighbors.\\
+Prove that H is always connected, or provide an example of a connected graph G for which H is not connected.}\\
+\textbf{\large Proof by induction on k:\\}
+Let k be the number of different edge pairs for T and T'.\\
+The statement that H is connected equals to there is always a path of length k from T to T' in G\\
+\textbf{Base case:}k=1. \\
+The case is that T and T' are neighbors because T contains exactly one edge that is not in T', and T' contains exactly one edge that is not in T. So there is an edge between them. T and T' are connected and the path is of leangth 1.
+\textbf{Induction:}\\
+Assume in case $k \ge 1$ the statement is true. We need to prove the statement for case k+1.\\
+Suppose T(V,E) and T'(V,E') has k+1 edge pairs not in common, i.e. $|E-E'|=|E'-E|=k+1$. Choose a random edge e that satisfies $e \in E\ and\ e \notin E'$, add e to E' (i.e. E'' = E' +e) then we get T''(V,E''). Then T must contains a cycle containing e and also an edge e' which satisfies $e' \in E'\ and\ e' \notin E$. So $T_0 = T' \cup e - e'$ is neighbor to T' and $T_0$ has a path of length k according to the statement for case k. So there is a path of length $k+1$ between T and T'.\\
+\textbf{Conclusion:\\}
+There is always a path between any pair of spanning trees, the hypergraph H is always connected.
+
+\clearpage
+\section{Problem \uppercase\expandafter{\romannumeral3}}
+\textbf{(a)A binary counter of unspecified length supports two operations: increment
+(which increases its value by 1) and reset (which sets its value back to zero).\\
+ Show that,
+starting from an initially zero counter, any sequence of n increment and reset operations
+takes time O(n); that is, the amortized time per operation in O(1).}\\
+\textbf{Proof:}\\
+According to the accounting method in amortized analysis:\\
+The increment operation will only set one bit from 0 to 1 and set some bits from 1 to 0.\\
+The reset operation will reset all bits to 0.\\
+Since a bit can be set from 1 to 0 only in the case that it has been set from 0 to 1 in a former increment operation, we can set the amortized time cost to 2 to a increment operation, 1 time is used to set a bit to 1, and 1 time is saved to set the bit back to 0 in a future operation(increment or reset).\\
+So the increment/reset operation will always get enough time from amortized time saved in past to set bits back to 0.\\
+Thus a sequence of n operations will takes O(2n) = O(n) time. The amortized time per operation is O(1).\\
+\textbf{(b) Suppose you implement the disjoint-sets data structure on n elements without path compression. Give a sequence of m Union and Find operations that take $\Omega(m \log n)$ time}\\
+First do n-1 Union operations to create a tree of height $\log_2 n$:\\
+$Step_1$: do $Union(x_1,x_2), Union(x_3,x_4),$. . . , $Union(x_{n-1},x_n)$ to create n/2 trees of height 2 and size 2;\\
+$Step_k$: do Union within any pair of trees created by $step_{k-1}$ to create trees of height k+1\\
+After n-1 Union operations the bionomial tree we get is of height $\log_2 n$.\\
+Then the rest m-n+1 operations should be find operations on the nodes. All the Union operations cost O(1) time so they cost O(n) time in total.\\ 
+Since find operation on a tree of height $\log_2 n$ is $\Omega(\log_2 n)$ since more than half of the nodes in this tree is below the height of half of $\log_2 n$.\\
+Let $m \ge 2n$, the m-n = $\Omega(m)$ find operations will cost $O(m\log_2 n)$ time in total.\\
+So the sequence take $\Omega(m \log n)$ time.\\
+
+
+
+\clearpage 
+\section{Problem \uppercase\expandafter{\romannumeral4}}
+\textbf{You are given a flow network G = (V, E) with demands where every edge e has an integer capacity $c_e$, and an integer lower bound $l_e \ge 0$. A circulation f must now satisfy $l_e\le f(e)\le c_e$ for every $e \in E$, as well as the demand constraints. Determine whether a feasible circulation exists.}\\
+\textbf{\large Description:\\}
+Convert the problem to finding maxflow problem. Set an initial circulation $C_0$ that for all edges: $f_0(e) = l(e)$ and compute for each nodes $L(v) =  f_0^{in} (v) - f_0^{out} (v) =  \sum_{e\ into\ v} l(e) - \sum_{v\ out\ of\ v} l(e).$\\
+Set the network to meet:\\
+1. for every edges the capacity is c(e) - l(e) and $0 \le f(e)\le c(e) - l(e)$;\\
+2. for every nodes the demand is $f_1^{in} (v)  - f_1^{out} (v) =  d_v - L(v)$\\
+Add a source node s, and join it to all nodes that $d_v<0$, with edge capacity equal to -dv.\\
+Add a sink node s, and join it to all nodes that $d_v>0$, with edge capacity equal to dv.\\
+Then all the nodes has $d_v=0$ except s and t, the network is converted to a flow network.\\
+Use the Fold-Fulkerson algorithm to get the maxflow.\\
+Check if the maxflow value equals to $\sum_{v\in\ nodes\ in\ the\ original\ network\ that\ has\ d_v>0} d_v$ and return boolean value.\\
+\textbf{\large Pseudocode:\\}
+\begin{algorithm}[H]
+  \caption{Function ExistCirculation$(G)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \STATE Set the flow as the lower bound $l_e$ for every edge in G
+  \STATE Compute the value $L(v) =  f_0^{in} (v) - f_0^{out} (v) =  \sum_{e\ into\ v} l(e) - \sum_{v\ out\ of\ v} l(e).$ for every node in G
+  \FOR{All nodes and edges in G}
+  \STATE For all edges, set capacity as $c(e) = c(e) - l(e)$
+  \STATE For all nodes, set demand as $d_v = f_1^{in} (v)  - f_1^{out} (v) =  d_v - L(v)$
+  \ENDFOR
+  \STATE Compute F = $\sum_{v\in\ nodes\ has\ d_v>0} d_v$
+  \STATE Add a source node s and connect it to every node that satisfy $d_v<0$ with edge capacity $-d_v$ and reset the joined nodes with demand 0
+  \STATE Add a sink node t and connect it from every node that satisfy $d_v>0$ with edge capacity $d_v$ and reset the joined nodes with demand 0
+  \STATE run Fold-Fulkerson algorithm on the new net work to find maxflow from s to t without demand constraint
+  \IF{the maxflow equals to F}
+  \RETURN True
+  \ELSE
+  \RETURN False
+  \ENDIF
+  \end{algorithmic}
+\end{algorithm}
+\noindent\textbf{\large Correctness:\\}
+Set an initial circulation $C_0$ that for all edges: $f_0(e) = l(e)$ and compute for each nodes $L(v) =  f_0^{in} (v) - f_0^{out} (v) =  \sum_{e\ into\ v} l(e) - \sum_{v\ out\ of\ v} l(e).$\\
+Find another circulation $C_1$ in a network that meets:\\
+1. for every edges the capacity is c(e) - l(e) and $0 \le f(e)\le c(e) - l(e)$;\\
+2. for every nodes the demand is $f_1^{in} (v)  - f_1^{out} (v) =  d_v - L(v)$\\
+If circulation $C_1$ can be found, the combination of $C_0$ and $C_1$ should satisfy all the requirement in the problem because $C_0$ already satisfies the lower bound and $C_1$ is found on the base of $C_0$ to meet other requirements.\\
+The combination of $C_0,C_1$ meets:\\
+1. for every edges $l(e)+0 \le f(e)\le l(e) + c(e) - l(e)$;\\
+2. for every nodes $f_1^{in} (v)  - f_1^{out} (v) =  L(v) + d_v - L(v)$\\
+So the problem equals to finding $C_1$.\\
+To prove that the algorithm can correctly find whether there is a circulation meets the demand and capacity:\\
+Convert the circulation problem into a flow problem. 
+Add a source node s, and join it to all nodes that $d_v^{new}<0$, with edge capacity equal to -$d_v^{new}$.\\
+Add a sink node s, and join it from all nodes that $d_v^{new}>0$, with edge capacity equal to $d_v^{new}$.\\
+Then all the nodes has $d_v=0$ except s and t, the network is converted to a flow network with only one source node and one sink node.\\
+When the maxflow in this network has value exactly $\sum_{v\in\ nodes\ in\ the\ network1\ that\ has\ d_v>0} d_v$. Remove the node s and t while keeping the other flows the rest part is a feasible circulation that satisfies the requirement because all the nodes satisfying the demand as well as all edges's capacity. 
+And if there is such a feasible circulation, a maxflow of those properties can be found as well.\\
+The problem is converted to finding a maxflow has value exactly $\sum_{v\in\ nodes\ in\ the\ network1\ that\ has\ d_v>0} d_v$.\\
+As we know the algorithm is designed to find maxflow so the correctness is proved.\\
+\textbf{\large Complexity:\\}
+Time complexity:\\
+For computing the initial circulation O(m);\\
+For set new property to new net work: O(m) time;\\
+For adding nodes: O(n) time;\\
+For Fold-Fulkerson algorithm: O(mf) time;\\
+In total: O(mf) time
+
+\clearpage
+\section{Problem \uppercase\expandafter{\romannumeral5}}
+\textbf{In a min-cost flow problem, the input is a flow network with supplies where each $edge (i, j) \in E$ also has a cost $a_{ij}$. Given a flow network with supplies and costs, the goal is to find a feasible
+flow f : $E \rightarrow R^+$ —that is, a flow satisfying edge capacity constraints and node supplies—
+that minimizes the total cost of the flow\\
+(a) Show that max flow can be formulated as a min-cost flow problem.}\\
+The max flow problem is a special case of a min-cost flow problem if we set the properties as following.\\
+For every nodes, set $s_v$ = 0; For every edges, set cost $c_e = 0$, keep the capacity constraints.\\
+Then add a edge from t to s, and set $(c_e=-1)$ to give rewards to the scale of flow, and set capacity to $\infty$.
+Then the problem to maximize the flow is converted to minimizing the total cost in the new network with cost: because the bigger the flow from s to t is, the lower the total cost is. (Since the cost is decided by the total flow on edge (t,s) and the size of the flow on edge (t.s) equals to the flow from s to t through the original network.)\\
+\end{document}

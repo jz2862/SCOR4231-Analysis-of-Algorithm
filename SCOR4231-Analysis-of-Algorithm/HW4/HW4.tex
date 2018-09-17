@@ -1,0 +1,269 @@
+\documentclass{article} 
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{float}
+
+\Large
+\title{CSOR4231 Algorithm\\HW4} 
+\author{Jialin Zhao --- jz2862} 
+\date{\today}
+\begin{document} 
+\maketitle{} 
+\section{Problem \uppercase\expandafter{\romannumeral1}} 
+\textbf{Give an efficient algorithm to find an odd-length cycle in a directed graph.\\\\}
+\textbf{\large Description:\\}
+First break the graph into strongly connected components (SCCs). In Each SCC, run BFS from an arbitrary node s to color the levels of the tree as red and blue to represent two parities. \\
+If there is no edge found between levels of the same color then G is bipartite, which means the graph contains no odd cycle.\\
+Otherwise, if there is an edge (u,v) between levels of the same color, run BFS to get a path from v to s.
+If the length of the path (s to u + edge(u,v) + v to s) found is odd, an odd cycly is composed of path s to u to v to s. If the length of this path is even then an odd cycle is s to v to s.\\
+\textbf{\large Pseudocode:\\}
+\begin{algorithm}[H]
+  \caption{Function odd-cycle$(G)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \STATE Using DFS to find all SCCs in G 
+  \FOR{every C in SCCs}
+  \STATE Run BFS from an arbitrary node s in C and color the levels of BFS tree using two colors representing different parts, represent the path from s to u as $P_{su}$
+  \IF{When running BFS, the edge (u,v) considered in this step is between nodes of same color}
+  \STATE Run BFS from v in C to get a path $P_{vs}$ from v to s 
+  \IF{The length of (path $P_{su}$ from s to u + $P_{vs}$) is even}
+  \RETURN The cycle $P_{su}$+ edge(u,v) + $P_{vs}$ 
+  \ELSE
+  \RETURN The cycle $P_{sv}$ + $P_{vs}$ 
+  \ENDIF
+  \ENDIF
+  \ENDFOR
+  \end{algorithmic}
+\end{algorithm}
+\noindent\textbf{\large Correctness:\\}
+Because a cycle can only be found in a SCC, the problem is equal to finding an odd length cycle in one of the SCCs in graph G. We only need to prove that the algorithm can find odd-length cycle in a SCC after breaking the Graph into SCCs.\\
+If there is a odd length circle, then it cannot be two-colored so that an edge between the nodes in parity will be found by our algorithm.\\
+If an edge(u,v) between nodes in same parity is found, then the length of path $P_{su}$ from s to u and the path $P_{vs}$ from s to v are of same parity, the length of cycle $P_{su}$ + edge(u,v) + $P_{vs}$  and the length of cycle $P_{sv}$ + $P_{vs}$ are of different parity, i.e. either cycle $P_{su}$ + edge(u,v) + $P_{vs}$ or the cycle $P_{sv}$ + $P_{vs}$ are odd-cycle we want.\\
+ So, the algorithm return a odd cycle if exist.\\
+\textbf{\large Complexity:\\}
+Running Time:
+Finding SCCs takes O(n+m) time; Two-coloring takes O(n+m) time; Finding $P_{vs}$ takes O(n+m) time;
+So the total time complexity is O(n+m).\\
+
+\clearpage
+\section{Problem \uppercase\expandafter{\romannumeral2}} 
+\textbf{Given an undirected graph G = (V, E) and a specific edge $e \in E$, give an efficient algorithm that determines whether G has a cycle that contains e.}\\
+\textbf{\large Description:\\}
+Let e = (u,v). Using DFS in (V,E-e) to check if start node u can get to v. If so, G has a cycle containing e; otherwise there is no cycle containing e in G.\\
+\textbf{\large Pseudocode:\\}
+\begin{algorithm}[H]
+  \caption{Function cyclecontain$(G,e)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \STATE deleting e(u,v) from E
+  \STATE Start from node u and run DFS until find a path to v and return YES
+  \RETURN NO
+  \end{algorithmic}
+\end{algorithm}
+\noindent\textbf{\large Correctness:\\}
+The graph has a cycle containing e(u,v) if and only if (v are reachable from u through e) whcih is already known and u are reachable from v which can be correctly checked by the algorithm after removing v and dding a DFS on this graph from v. \\
+\textbf{\large Complexity:\\}
+Running DFS takes $O(|V|+|E|)$ time.
+
+
+\clearpage
+\section{Problem \uppercase\expandafter{\romannumeral3}}
+\textbf{design an algorithm that fills in the entire cost array.\\
+(a) Give a linear-time algorithm that works for directed acyclic graphs.\\}
+\textbf{\large Description:\\}
+Sort DAG topologically. For each node $u \in V$, in reverse topological order, compute the minimum cost of u by min(the cost of u itself, the cost of every node v in edge $(u,v) \in E$)\\
+\textbf{\large Pseudocode:\\}
+\begin{algorithm}[H]
+  \caption{Function MiniCostDAG$(G)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \STATE Use DFS to sort the DAG in topological order.
+  \STATE Array C $\Longleftarrow$ the array storing cost for each node, initialized with each nodes' price
+  \STATE In reverse topological order, compute C[u] = min(C[u],C[v] for every edge $(u,v)\in E$)
+  \end{algorithmic}
+\end{algorithm}
+\noindent\textbf{\large Correctness:\\}
+\textbf{Lemma}: C[u] is corrected for nodes computed in reverse topological order.
+\textbf{Base case}: For the first node u in reverse topological order, C[u] = the price of u is correct because there is no nodes reachable from u.\\
+\textbf{Induction}: Suppose the set of nodes traversed in reverse topological order yet are computed with correct C[u].\\
+For the next node v in reverse topological order, C[v] = min(C[u],C[v] for every edge $(u,v)\in E$) should be correct if all C[v] for reachable nodes v from u is computed correctly. Since we traversed nodes in reverse topological order, all v reachable from u is already computed correctly. So the cost for u, i.e. C[u] is correctly computed.\\
+\textbf{Conclusion}:
+So the cost of every node is correctly computed in reverse topological order.\\
+\textbf{\large Complexity:\\}
+Sorting takes $O(|V|+|E|)$ time; Iterating over all edges in E and compute the minicost takes $O(|E|)$ time;\\
+The total running time is $O(|V|+|E|)$;\\
+\textbf{(b) Extend this to a linear-time algorithm that works for all directed graphs}\\
+\textbf{\large Description:\\}
+Find all SCCs in G. Set the cost of each SCC as the minimum cost of its nodes. View the graph as DAG C(A,B) composed of SCCs(A) and edges B between SCCs, sort it and compute the minimumcost by min(the cost of SCC a itself, the cost of every nodes b in edge(a,b) $\in B$) in reverse topological order. Assign the SCC cost to its node members as node cost.\\
+\textbf{\large Pseudocode:\\}
+\begin{algorithm}[H]
+  \caption{Function MiniCost$(G)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \STATE Use DFS to find all SCCs in G and get DAG $G_{SCC}$
+  \FOR{each SCC C}
+  \STATE $P_{SCC}[C] \Longleftarrow the\ minimum\ price\ of\ all\ nodes\ in\ C$
+  \STATE assign $P_{SCC}[C]$ to SCC C as its price
+  \ENDFOR
+  \STATE Run MiniCostDAG($G_{SCC}$) to find the minimum cost for every SCC
+  \STATE Assign the minimum cost of every SCC to each nodes in it
+  \end{algorithmic}
+\end{algorithm}
+\noindent\textbf{\large Correctness:\\}
+Because nodes in a same SCC are reachable from each other, so the cost of them is the same. If there is no edge out of the SCC, the cost for the nodes in this SCC should be the minimum price of nodes in SCC. The problem is equal to (a) if we consider every SCC as a component of DAG.\\
+\textbf{Lemma}: C[u] is corrected for SCCs computed in reverse topological order.
+\textbf{Base case}: For the first SCC u in reverse topological order, C[u] = the price of u is correct because there is no SCCs reachable from u.\\
+\textbf{Induction}: Suppose the set of SCCs traversed in reverse topological order yet are computed with correct C[u].\\
+For the next SCC v in reverse topological order, C[v] = min(C[u],C[v] for every edge $(u,v)\in E$) should be correct if all C[v] for reachable SCCs v from u is computed correctly. Since we traversed SCCs in reverse topological order, all v reachable from u is already computed correctly. So the cost for u, i.e. C[u] is correctly computed.\\
+\textbf{Conclusion}:
+So the cost of every SCC is correctly computed in reverse topological order.\\
+\textbf{\large Complexity:\\}
+Finding SCCs takes $O(|V|+|E|)$ time; Sorting takes $O(|V|+|E|)$ time; Iterating over all edges in E and compute the minicost takes $O(|E|)$ time;\\
+The total running time is $O(|V|+|E|)$;\\
+
+
+
+
+\clearpage 
+\section{Problem \uppercase\expandafter{\romannumeral4}}
+\textbf{Design and analyze a dynamic programming algorithm for this problem that runs in time polynomial in n and $\sum_{i=1}^n a_i$}\\
+\textbf{\large Description:\\}
+Using a modified version of Dijkstra's Algorithm.\\
+Inplement a little modification to Update function to raise the priority of the shortest distance with less edges in this path.\\
+Use a priority queue implemented as a binary min-heap: store vertex u with key dist[u] attached with attribute best[u].\\
+\textbf{\large Pseudocode:\\}
+\begin{algorithm}[H]
+  \caption{Function DijkstraBest$(G,e)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \STATE Priority queue Q with key dist[v] and attribute best[v]
+  \STATE Initialize dist[s] = 0, and other value of dist as $\infty$
+  \STATE Initialize best[s] = 0, and other value of best as $\infty$
+  \STATE Maintain a set S of nodes for which the distance from s has been determined
+  \STATE Initialize Q = \{V;dist;best\} , S = []
+  \FOR{Q is not empty}
+  \STATE u = ExtractMin(A) 
+  \STATE //Extract the node with minimum dist[u] from Q,
+  \STATE //if there is more than one minimum, choose one with the smallest best[u]
+  \STATE $S = S \cup \{ u\}$
+  \FOR{all edge $(u,v)\in E$}
+  \STATE Update(u,v)
+  \ENDFOR
+  \ENDFOR 
+  \end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+  \caption{Function Update$(u,v)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \IF{$dist[v]>dist[u]+w(u,v)$}
+  \STATE dist[v] = dist[u]+w(u,v)
+  \STATE best[v] = best[u]+1
+  \ELSIF{$dist[v] == dist[u]+w(u,v)$}
+  \IF{$best[v]> best[u]+1$}
+  \STATE best[v] = best[u]+1
+  \ENDIF 
+  \ENDIF
+  \end{algorithmic}
+\end{algorithm}
+\noindent\textbf{\large Correctness:\\}
+\textbf{Lemma}: dist[u] of nodes in S is the shortest distance of path from s;\\
+best[u] of nodes in S is the smallest number of edges for shortest path.\\
+\textbf{Base case}: S = \{s\}, since s is the start node, dist[u] = 0, best[u] = 0 represent the shortest path\\
+\textbf{Induction}: Suppose S satisfy the Lemma;\\
+For case $S' = S + u$, where u is the last node added into S by the algorithm:\\
+Since the algorithm picks u based on smallest dist and best value via (path in S) + (edge from node in S to u), u is nearer to s than other nodes outside S.
+Suppose for a contradiction that the shortest path from s-to-u is Q whose length a is less than dist[u] or its number of edges b is less than best[u];\\
+Since the path for dist[u],best[u] is the minimum value of distance to s and number of edges for each best paths from s to a node v in S + edge(v,u), $a<dist[u]$ or $b<best[u]$ means the shortest path Q can only get to u from some node m outside S.\\
+However, since dist[u] and best[u] is already the smallest for nodes not in S, a = dist[m] + edge(m,u) must $\ge$ dist[u] or b = best[m]+1 $\ge$ best[u] which means the Q can only be from inside S and the dist and best value for u is correct.\\
+\textbf{Conclusion:}
+The lemma also holds for $S'$, which can also hold for S = V\\
+\textbf{\large Complexity:\\}
+Time complexity: same as normal Dijkstra: $O(|E| log |V|)$
+
+\clearpage
+\section{Problem \uppercase\expandafter{\romannumeral5}}
+\textbf{Consider a network of roads G = (V, E) connecting a set of cities V . Each road
+in E has an associated length $l_e$. There is a proposal to add one new road to this network,
+and there is a list $E'$ of pairs of cities between which the new road can be built. Each such
+potential road $e' \in E'$ has an associated length.\\
+As a designer for the public works department you are asked to determine the road $e' \in E'$ whose addition to the existing network G will result in the maximum decrease in the driving
+distance between two fixed cities s and t in the network. Give an efficient algorithm for
+solving this problem.\\}
+\textbf{\large Description:\\}
+View the problem as adding a pair of edges(u,v) edge(v,u) between two nodes in an directed graph to minimize the distance for path from s to t. Use Dijstra algorithm twice to get the shortest distance from s to any other nodes and from t to any other nodes. Then compute the shortest distance for every possible edge in $|E'|$ with the equation (the shortest path from s to u)+edge(u,v)+(the shortest path from v to t). Choose the edge with the shortest distance.\\
+\textbf{\large Pseudocode:\\}
+\begin{algorithm}[H]
+  \caption{Function BestPath$(G,E')$}
+  \label{alg1}
+  \begin{algorithmic}
+  \STATE For every pair (u,v) in E', replace it with edge(u,v) and edge(v,u)
+  \STATE Use Dijkstra algorithm on G to get all Ps[u], Pt[u]
+  \STATE Ps[u] $\Longleftarrow$ the shortest distance from s to other node u
+  \STATE Pt[u] $\Longleftarrow$ the shortest distance from t to other node u
+  \FOR{$e \in E'$}
+  \STATE compute the shortest distance dist[e] = $Ps[u] +l_e+ Pt[u]$
+  \ENDFOR
+  \RETURN the e with the smallest dist[e]
+  \end{algorithmic}
+\end{algorithm}
+\noindent\textbf{\large Correctness:\\}
+Since the algorithm goes through all possible city pairs that can add new edge, we only need to essure that the distance from s to t computed for the best edge is smaller than any other edges so that it can be chosen.\\ 
+For edges that are not the best edge, the shortest distance $P_{su}+edge(u,v)+P_{vt}$ computed by running Dijkstra algorithm before adding edge(u,v) can only be equal or larger than the real distance because $P_{su}\ and\ P_{vt}$ can only be equal or larger than the shortest path whens considering in edge(u,v).\\
+For the best edge(u,v) to get shortest path, the shortest path from s to t must be equal to $P_{su}+edge(u,v)+P_{vt}$ computed by running Dijkstra algorithm before adding edge(u,v), since the shortest path from s to u does not contain v because:\\ If the shortest path from s to u contains v, then at least path from s to v to t is better than this case which is contradictory to the shortest path assumption. Similarly the shortest path from v to t does not contain u.\\ So the distance is computed correctly in this case.\\
+CONCLUSION: The best edge is chosen correctly because the path distance is the shortest in every case.\\
+\textbf{\large Complexity:\\}
+Runnning Dijsktra algorithm takes $O(|E|\log |V|)$.\\
+Iterating on every possible edges takes $O(|E'|)$.\\
+The total time complexity is $O(|E|\log |V|+|E'|)$
+
+
+\clearpage
+\section{Problem \uppercase\expandafter{\romannumeral6}}
+\textbf{Arbitrage is the use of discrepancies in currency exchange rates to transform one
+unit of a currency into more than one unit of the same currency. For example,
+suppose that 1 U.S. dollar buys 49 Indian rupees, 1 Indian rupee buys 2 Japanese
+yen, and 1 Japanese yen buys 0.0107 U.S. dollars. Then, by converting currencies,
+a trader can start with 1 U.S. dollar and buy 1.0486 dollars,
+thus turning a profit of 4.86 percent.\\
+Suppose that we are given n currencies $c_1, c_2,...,c_n$ and an $n*n$ table R of
+exchange rates, such that one unit of currency $c_i$ buys R[i,j] units of currency $c_j$.\\\\
+a. Give an efficient algorithm to determine whether or not there exists a sequence
+of currencies $c_{i_1}, c_{i_2},...,c_{i_k}$ such that
+$$R[i_1,i_2]R[i_2,i_3]...R[i_k-1,i_k]R[i_k,i_1]>1$$
+Analyze the running time of your algorithm.\\}
+\textbf{\large Description:\\}
+Convert the R[i,j] to $-\log R[i,j]$ then use Bellman Ford algorithm to find whether there exists a negative cycle in G(V,E), in which V is composed of nodes representing currencies and E is composed of edges representing $R[i,j]$.\\
+\textbf{\large Pseudocode:\\}
+\begin{algorithm}[H]
+  \caption{Function Arbitrage$(G)$}
+  \label{alg1}
+  \begin{algorithmic}
+  \FOR{every edges(i,j) in E}
+  \STATE $R[i,j]$ $\Longleftarrow$ $-\log R[i.j]$
+  \ENDFOR
+  \STATE Adding an vertex $v_0$ to V, Adding 0-weighted edges between $v_0$ and any other vertex in G to E 
+  \STATE Run Bellman-Ford algorithm starting from vertex $v_0$ and determine whether there is a negative cycle in G
+  \IF{There is a negative cycle in G}
+  \RETURN YES
+  \ENDIF
+  \RETURN FALSE
+  \end{algorithmic}
+\end{algorithm}
+\noindent\textbf{\large Correctness:\\}
+$$R[i_1,i_2]R[i_2,i_3]...R[i_k-1,i_k]R[i_k,i_1]>1$$ is equal to $$-\log{R[i_1,i_2]}-\log{R[i_2,i_3]}...-\log{R[i_k-1,i_k]}-\log{R[i_k,i_1]<0}$$ 
+the second equation is equal to a negetive cycle in G.\\
+So if and only if Bellman-Ford finds a negtive length cycle, the currency buying chains in this cycle satisfy the equation above.\\
+\textbf{\large Complexity:\\}
+\textbf{Time}: Construction of graph G(V,E) costs $O(n+n^2)$ time because the number of edges is $n^2$;\\
+Running Bellman-Ford method costs $O(nm)= O(n *n^2)=O(n^3)$ time.\\
+So the total time complexity is $O(n^3)$.\\
+\end{document}
